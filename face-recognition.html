@@ -1,0 +1,525 @@
+<!DOCTYPE HTML>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Face Recognition - A. P. I. Bharath Bhooshan Menon</title>
+		<!-- Favicons -->
+		<link href="assets/img/favicon.png" rel="icon">
+		<link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" href="assets/css/atom-one-dark-reasonable.css">
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo"><strong>Portfolio</strong> <span>A. P. I. Bharath Bhooshan Menon</span></a>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<ul class="links">
+							<li><a href="index.html">Home</a></li>
+							<li><a href="machine-learning.html">Machine Learning</a></li>
+							<li><a href="pytorch.html">PyTorch</a></li>
+							<!--<li><a href="tableau.html">Tableau</a></li>
+							<li><a href="python.html">Python</a></li>
+							<li><a href="tensorflow.html">TensorFlow</a></li>
+							<li><a href="sql.html">SQL</a></li>-->
+							<li><a href="web-scraping.html">Web Scraping</a></li>
+						</ul><!-- 
+						<ul class="actions stacked">
+							<li><a href="#" class="button primary fit">Get Started</a></li>
+							<li><a href="#" class="button fit">Log In</a></li>
+						</ul> -->
+					</nav>
+
+				<!-- Main -->
+					<div id="main" class="alt">
+
+						<!-- One -->
+							<section id="one">
+								<div class="inner">
+									<header class="major">
+										<h1>Face Recognition (31 Celebrities)
+											<a href="https://github.com/api-b-b-m/pytorch/blob/b74b13a4bd6c78a54284174f7d46374ed171b3e1/Face%20Recognition/face-recognition.ipynb">
+												<img src="../assets/img/github_light.png" alt="GitHub logo" width="60" style="vertical-align: middle;">
+											</a>
+										</h1>
+									</header>
+
+									<!-- Content -->
+									<p>Implemented a face recognition classifier which is run across 31 labels (celebrities) with 49 images per label.</p>
+
+									<h2>Dataset
+										<a href="https://www.kaggle.com/datasets/cybersimar08/face-recognition-dataset/data">
+											<span>
+												<img src="../assets/img/kaggle_light.png" alt="Kaggle logo" width="70" style="vertical-align: middle;">
+											</span>
+										</a>
+									</h2>
+									<p>
+									A Face Dataset of different celebrities after applying MTCNN (Multi-Task Cascaded Convolutional Neural Network) for face detection. <br/>Contains 49 images per celeb with labels that are included are as follows:<br/>1. Akshay Kumar<br/>2. Alexandra Daddario<br/>3. Alia Bhatt<br/>4. Amitabh Bachchan<br/>5. Andy Samberg<br/>6. Anushka Sharma<br/>
+7. Billie Eilish<br/>8. Brad Pitt<br/>9. Camila Cabello<br/>10. Charlize Theron<br/>11. Claire Holt<br/>12. Courtney Cox<br/>13. Dwayne Johnson<br/>14. Elizabeth Olsen<br/>15. Ellen Degeneres<br/>
+16. Henry Cavill<br/>17. Hrithik Roshan<br/>18. Hugh Jackman<br/>19. Jessica Alba<br/>20. Kashyap<br/>21. Lisa Kudrow<br/>22. Margot Robbie<br/>23. Marmik<br/>24. Natalie Portman<br/>25. Priyanka Chopra<br/>
+26. Robert Downey Jr.<br/>27. Roger Federer<br/>28. Tom Cruise<br/>29. Vijay Deverakonda<br/>30. Virat Kohli<br/>31. Zac Efron</p>
+									<h2>Code</h2>
+										<div><md-block>### Pytorch Dataset</md-block>
+									<pre>
+													<code class="language-python">#Import packages and models
+from glob import glob
+from PIL import Image
+from torch.utils.data import Dataset,DataLoader
+from torchvision.datasets import ImageFolder
+from tqdm.notebook import tqdm
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import timm
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torchvision.transforms as transforms
+&#x1F5F8; 10.4s</code>
+<code class="language-python">#Declare CelebsDataSet class
+class CelebsDataSet(Dataset):
+	def __init__(self,data_dir,transform=None):
+		self.data=ImageFolder(data_dir,transform=transform)
+	def __len__(self):
+		return len(self.data)
+	def __getitem__(self,idx):
+		return self.data[idx]
+	@property
+	def classes(self):
+		return self.data.classes
+&#x1F5F8; 0.0s</code>
+<code class="language-python">data_dir='../data/Face recognition/Faces' #original_dataset
+noc= 31 #Number of classes
+original_dataset=CelebsDataSet(data_dir)
+&#x1F5F8; 0.0s</code>
+<code class="language-python">len(original_dataset) #length of the dataset
+&#x1F5F8; 0.0s</code><span>1483</span><br/>
+<code class="language-python">#get any image and its label from the dataset to confirm it is working
+image,label=original_dataset[5] 
+print(label)
+image
+&#x1F5F8; 0.0s</code><span>0</span><span><br/><img src='images/face-recognition/output_6_1.jpg'/></span><br/>
+<code class="language-python">#Get a dictionary associating target values with folder names
+target_to_class={v:k for k,v in ImageFolder(data_dir).class_to_idx.items()}
+print(target_to_class)
+&#x1F5F8; 0.0s</code><font size="3">{0: 'Akshay Kumar', 1: 'Alexandra Daddario', 2: 'Alia Bhatt', 3: 'Amitabh Bachchan', 4: 'Andy Samberg', 5: 'Anushka Sharma', 6: 'Billie 
+Eilish', 7: 'Brad Pitt', 8: 'Camila Cabello', 9: 'Charlize Theron', 10: 'Claire Holt', 11: 'Courtney Cox', 12: 'Dwayne Johnson', 13: 
+'Elizabeth Olsen', 14: 'Ellen Degeneres', 15: 'Henry Cavill', 16: 'Hrithik Roshan', 17: 'Hugh Jackman', 18: 'Jessica Alba', 19: 'Kashyap',
+20: 'Lisa Kudrow', 21: 'Margot Robbie', 22: 'Marmik', 23: 'Natalie Portman', 24: 'Priyanka Chopra', 25: 'Robert Downey Jr', 26: 'Roger 
+Federer', 27: 'Tom Cruise', 28: 'Vijay Deverakonda', 29: 'Virat Kohli', 30: 'Zac Efron'}<br/></font>
+<code class="language-python">#Making sure that images are always 160x160
+transform=transforms.Compose([
+	transforms.Resize((160,160)),
+	transforms.ToTensor(),
+])
+&#x1F5F8; 0.0s</code>
+<code class="language-python">#Train-test spliting
+original_dataset=CelebsDataSet(data_dir,transform)
+train_size=int(0.6*len(original_dataset))
+valid_size=int(0.2*len(original_dataset)) 
+test_size=len(original_dataset)-(train_size+valid_size)
+train_size+=len(original_dataset)-(train_size+valid_size+test_size)
+
+train_dataset, valid_dataset, test_dataset=torch.utils.data.random_split(
+	original_dataset, [train_size, valid_size, test_size]
+	)
+
+#Running it for a random image
+image,label=train_dataset[100]
+print(image)
+print(image.shape)
+&#x1F5F8; 0.2s</code>tensor([[[0.0510, 0.0549, 0.0549,  ..., 0.0824, 0.0863, 0.0706],
+         [0.0549, 0.0549, 0.0549,  ..., 0.0863, 0.1020, 0.0902],
+         [0.0392, 0.0431, 0.0431,  ..., 0.0667, 0.0824, 0.0824],
+         ...,
+         [0.3765, 0.3529, 0.3216,  ..., 0.3686, 0.3373, 0.3137],
+         [0.3333, 0.3294, 0.3176,  ..., 0.3529, 0.3216, 0.2980],
+         [0.2745, 0.2784, 0.2863,  ..., 0.3412, 0.3059, 0.2902]],
+
+        [[0.0353, 0.0392, 0.0314,  ..., 0.0431, 0.0431, 0.0275],
+         [0.0392, 0.0392, 0.0314,  ..., 0.0471, 0.0588, 0.0471],
+         [0.0196, 0.0275, 0.0275,  ..., 0.0275, 0.0353, 0.0353],
+         ...,
+         [0.1804, 0.1686, 0.1412,  ..., 0.2667, 0.2314, 0.2157],
+         [0.1490, 0.1490, 0.1451,  ..., 0.2588, 0.2235, 0.2118],
+         [0.0980, 0.1059, 0.1137,  ..., 0.2471, 0.2196, 0.2039]],
+
+        [[0.0392, 0.0431, 0.0314,  ..., 0.0745, 0.0745, 0.0588],
+         [0.0431, 0.0431, 0.0392,  ..., 0.0784, 0.0902, 0.0784],
+         [0.0353, 0.0314, 0.0314,  ..., 0.0627, 0.0745, 0.0745],
+         ...,
+         [0.0745, 0.0667, 0.0471,  ..., 0.1765, 0.1490, 0.1294],
+         [0.0392, 0.0471, 0.0471,  ..., 0.1647, 0.1373, 0.1294],
+         [0.0000, 0.0000, 0.0157,  ..., 0.1529, 0.1373, 0.1216]]])
+torch.Size([3, 160, 160])<br/>
+<code class="language-python">#iterate over the dataset using dataloader after batching for faster training
+dataloader=DataLoader(train_dataset,batch_size=32,shuffle=True)
+for images,labels in dataloader:
+	break
+images.shape,labels.shape
+&#x1F5F8; 0.0s</code>(torch.Size([32, 3, 160, 160]), torch.Size([32]))<br/>
+</pre>
+</div><div>
+<md-block>### Pytorch Model</md-block>
+<pre><code class="language-python">#creating a pytorch model by inheriting from nn module
+class SimpleFaceClassifier(nn.Module):
+	def __init__(self,num_classes=noc):
+	    super(SimpleFaceClassifier,self).__init__()
+
+	    #Here we define all the parts of the model
+	    self.base_model=timm.create_model('efficientnet_b0',pretrained=True)
+	    self.features=nn.Sequential(*list(self.base_model.children())[:-1])
+	    enet_out_size=self.base_model.classifier.in_features
+		
+	    #Make a classifier to resize to our number of classes
+	    self.classifier = nn.Sequential(
+	        nn.Flatten(),
+	        nn.Linear(enet_out_size, num_classes)
+	    )
+
+	def forward(self,x):
+
+	    #Connect these parts and return the output
+	    x = self.features(x)
+	    output = self.classifier(x)
+	    return output
+&#x1F5F8; 0.0s</code>
+<code class="language-python">#creating an instance of the classifier class to check
+model=SimpleFaceClassifier(num_classes=noc)
+print(str(model)[:500])
+&#x1F5F8; 0.8s</code>SimpleFaceClassifier(
+  (base_model): EfficientNet(
+    (conv_stem): Conv2d(3, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn1): BatchNormAct2d(
+      32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True
+      (drop): Identity()
+      (act): SiLU(inplace=True)
+    )
+    (blocks): Sequential(
+      (0): Sequential(
+        (0): DepthwiseSeparableConv(
+          (conv_dw): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=32, bias=Fa<br/>
+<code class="language-python">#ensuring that model works without any errors
+example_out=model(images)
+example_out.shape
+&#x1F5F8; 0.7s</code>torch.Size([32, 31])
+</pre>
+</div><div>
+<md-block>### Training Loop</md-block>
+<pre><code class="language-python">#loss function
+criterion=nn.CrossEntropyLoss()
+
+#optimizer
+optimizer=optim.Adam(model.parameters(),lr=0.001)
+&#x1F5F8; 0.0s</code></pre>
+</div><div>
+<pre><code class="language-python">#ensuring that the shapes match
+criterion(example_out,labels)
+print(example_out.shape,labels.shape)
+&#x1F5F8; 0.0s</code>torch.Size([32, 31]) torch.Size([32])</pre>
+</div><div>
+<md-block>#### Engineering the data</md-block>
+<pre><code class="language-python">transform=transforms.Compose(
+    [
+        transforms.Resize((160,160)),
+        transforms.ToTensor(),
+    ]
+)
+#create specific loader for these datasets
+train_loader=DataLoader(train_dataset,batch_size=32,shuffle=True)
+test_loader=DataLoader(test_dataset,batch_size=32,shuffle=False)
+valid_loader=DataLoader(valid_dataset,batch_size=32,shuffle=False)
+&#x1F5F8; 0.0s</code></pre>
+</div><div>
+<md-block>#### Checking whether GPU is available</md-block>
+<pre><code class="language-python">#We define the device for the model to run on:
+device=torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device
+&#x1F5F8; 0.0s</code>device(type='cuda', index=0)
+</pre>
+</div><div>
+<md-block>#### Training starts</md-block>
+<pre><code class="language-python">#running through the entire dataset
+num_epochs=2					#number of times the model goes through the data
+train_losses,valid_losses,epochs=[],[],[]	#lists to catch 'training losses', 'validation losses' and epochs.
+model=SimpleFaceClassifier(num_classes=noc)	#calling the model 'SimpleFaceClassifier'
+model.to(device)				#moving the model to the GPU
+
+#Loss function
+criterion=nn.CrossEntropyLoss()
+
+#Optimizer
+optimizer=optim.Adam(model.parameters(),lr=0.001)
+
+#looping through epochs (number of times the model goes through the data)
+for epoch in range(num_epochs):
+	model.train()							#set the model to train
+	running_loss=0.0						#setting a temporary loss variable to '0'
+
+	#looping through the training dataset loader
+	for images,labels in tqdm(train_loader,desc='Training Loop'):
+		images,labels=images.to(device),labels.to(device)	#moving the images and labels to the GPU
+		optimizer.zero_grad()					#clear the optimizer gradients
+		outputs=model(images)					#catching the outputs after running through the model
+		loss=criterion(outputs,labels)			#comparing the output to the labels and 
+									#assigning a 'loss' through loss function
+		loss.backward()					#compute the gradient according to the loss
+		optimizer.step()					#update the optimizer weights accordingly
+		running_loss+=loss.item()*labels.size(0)		#increments the 'running loss' by the product of
+									#current loss and the 'batch size'
+
+	#calculating the training loss by dividing the 'running loss' by the length of 'training dataset'
+	train_loss=running_loss/len(train_loader.dataset) 
+
+	#appending the current 'training loss' to the 'training losses' list
+	train_losses.append(train_loss)				
+	
+	model.eval() 								#set the model to train
+	running_loss=0.0    							#setting a temporary loss variable to '0'
+	with torch.no_grad():   						#To disable the gradient calculations
+
+		#looping through the validation dataset loader
+		for images,labels in tqdm(valid_loader,desc='Validation Loop'):
+			images,labels=images.to(device),labels.to(device)	#moving the images and labels to the GPU
+			outputs=model(images)					#catching the outputs
+			loss=criterion(outputs,labels)			#comparing the output to the labels and 
+										#assigning a loss through loss function
+			running_loss+=loss.item()*labels.size(0)		#increments the 'running loss' by the product
+										#of current 'loss' and the 'batch size'
+
+	#calculating the validation loss by dividing the 'running loss' by the length of 'validation dataset'
+	valid_loss=running_loss/len(valid_loader.dataset)
+
+	#appending the current 'validation loss' to the 'validation losses' list
+	valid_losses.append(valid_loss)
+	
+	#appending the current 'epoch' number to the 'epochs' list; epoch+1 because epoch starts from 0
+	epochs.append(epoch+1)
+	
+	#Print epoch statistics
+	print(f"Epoch {epoch+1}/{num_epochs} - Training Loss: {train_loss}, Validation Loss: {valid_loss}")
+&#x1F5F8; 19.4s</code>Training Loop: 100% <progress id="file" value="100" max="100"> 100% </progress> 28/28 [00:08&lt00:00, 3.54it/s]
+Validation Loop: 100% <progress id="file" value="100" max="100"> 100% </progress> 10/10 [00:00&lt00:00, 12.05it/s]
+Epoch 1/2 - Training Loss: 2.3587397075477146, Validation Loss: 1.901028433361569<br/>
+Training Loop: 100% <progress id="file" value="100" max="100"> 100% </progress> 28/28 [00:08&lt00:00, 3.63it/s]
+Validation Loop: 100% <progress id="file" value="100" max="100"> 100% </progress> 10/10 [00:00&lt00:00, 12.83it/s]
+Epoch 2/2 - Training Loss: 0.5751913689722227, Validation Loss: 0.872601741069072<br/>
+</pre>
+</div><div>
+<md-block>#### Visualize Losses</md-block>
+<pre><code class="language-python">plt.plot(epochs,train_losses,label='Training Loss')
+plt.plot(epochs,valid_losses,label='Validation Loss')
+plt.xlabel('epochs')
+plt.ylabel('loss')
+plt.legend()
+plt.title('Loss over epochs')
+plt.show()
+&#x1F5F8; 0.1s</code><br/><img src='images/face-recognition/output_26_0.png'/><br/></pre>
+</div><div>
+<md-block>### Evaluating the results</md-block>
+<pre><code class="language-python">#Load and preprocess the image:
+def preprocess_image(image_path,transform):
+	image=Image.open(image_path).convert('RGB')
+	return image,transform(image).unsqueeze(0)
+
+#Predict using the model:
+def predict(model, image_tensor,device):
+	model.eval()
+	with torch.no_grad():
+		image_tensor=image_tensor.to(device)
+		outputs=model(image_tensor)
+		probabilities =torch.nn.functional.softmax(outputs,dim=1)
+	return probabilities.cpu().numpy().flatten()
+
+#Visualization
+def visualize_predictions(original_image,probabilities,class_names):
+	fig,axarr=plt.subplots(1,2,figsize=(12,25))
+	#Display image
+	axarr[0].imshow(original_image)
+	axarr[0].axis('off')
+	#Display predictions
+	axarr[1].barh(class_names,probabilities)
+	axarr[1].set_xlabel('Probabilities')
+	axarr[1].set_ylabel('Class Predictions')
+	axarr[1].set_xlim(0,1)
+	
+	plt.tight_layout()
+	plt.show()
+	
+#Example using a hard-coded image
+test_image='../data/Face recognition/Faces/Alexandra Daddario/Alexandra Daddario_13.jpg'
+transform=transforms.Compose(
+	[
+		transforms.Resize((160,160)),
+		transforms.ToTensor()
+	]
+)
+original_image,image_tensor=preprocess_image(test_image,transform)
+probabilities=predict(model,image_tensor,device)
+
+#getting the class names from the model classifier
+class_names = train_dataset.dataset.classes
+visualize_predictions(original_image,probabilities,class_names)
+&#x1F5F8; 0.5s</code><br/><img src='images/face-recognition/output_28_0.png'/><br/></pre>
+</div><div>
+<md-block>#### Calculate the accuracy of our model on the test_set</md-block>
+<pre>
+<code class="language-python">#getting 10 random images from the whole dataset
+test_images=glob('../data/Face recognition/Faces/*/*')
+test_examples=np.random.choice(test_images,10)
+
+#declaring a variable to calculate the number of current predictions
+num_correct = 0
+
+#getting the total number of images
+total_examples = len(test_examples)
+
+for example in test_examples:
+	original_image, image_tensor = preprocess_image(example, transform)
+	probabilities = predict(model, image_tensor, device)
+
+	#getting the class names from the model classifier
+	class_names = train_dataset.dataset.classes
+	
+	#extract true label from file path
+	true_label = example.split('\\')[1]  #since class folder name is the label
+	
+	# Get predicted label
+	predicted_label_index = np.argmax(probabilities)
+	predicted_label = class_names[predicted_label_index]
+	
+	# Check if prediction is correct
+	if predicted_label == true_label:
+		num_correct += 1
+	
+	# Print the true label and the predicted label
+	print("True label:", true_label)
+	print("Predicted label:", predicted_label)
+	
+	visualize_predictions(original_image, probabilities, class_names)
+
+#calculating the accuracy
+accuracy = num_correct / total_examples
+print("Accuracy:", accuracy)
+&#x1F5F8; 4.4s</code>True label: Billie Eilish
+Predicted label: Billie Eilish<br/><img src='images/face-recognition/output_29_1.png'/><br/>True label: Billie Eilish
+Predicted label: Charlize Theron<br/><img src='images/face-recognition/output_29_3.png'/><br/>True label: Hrithik Roshan
+Predicted label: Hrithik Roshan<br/><img src='images/face-recognition/output_29_5.png'/><br/>True label: Amitabh Bachchan
+Predicted label: Amitabh Bachchan<br/><img src='images/face-recognition/output_29_7.png'/><br/>True label: Dwayne Johnson
+Predicted label: Dwayne Johnson<br/><img src='images/face-recognition/output_29_9.png'/><br/>True label: Claire Holt
+Predicted label: Claire Holt<br/><img src='images/face-recognition/output_29_11.png'/><br/>True label: Billie Eilish
+Predicted label: Billie Eilish<br/><img src='images/face-recognition/output_29_13.png'/><br/>True label: Lisa Kudrow
+Predicted label: Lisa Kudrow<br/><img src='images/face-recognition/output_29_15.png'/><br/>True label: Vijay Deverakonda
+Predicted label: Vijay Deverakonda<br/><img src='images/face-recognition/output_29_17.png'/><br/>True label: Lisa Kudrow
+Predicted label: Lisa Kudrow<br/><img src='images/face-recognition/output_29_19.png'/><br/>Accuracy: 0.9</pre>
+</div>
+							</section>
+
+					</div>
+
+				<!-- Contact -->
+				<section id="contact">
+					<div class="inner">
+						<section>
+							<form action="https://api.web3forms.com/submit" method="POST">
+								<input type="hidden" name="access_key" value="3925ac66-53fe-42c3-9f4a-0385de0b9e76">
+								<div class="fields">
+									<div class="field half">
+										<label for="name">Name</label>
+										<input type="text" name="name" id="name" />
+									</div>
+									<div class="field half">
+										<label for="email">Email</label>
+										<input type="text" name="email" id="email" />
+									</div>
+									<div class="field">
+										<label for="message">Message</label>
+										<textarea name="message" id="message" rows="6"></textarea>
+									</div>
+								</div>
+								<ul class="actions">
+									<li><input type="submit" value="Send Message" class="primary" /></li>
+									<li><input type="reset" value="Clear" /></li>
+								</ul>
+							</form>
+						</section>
+						<section class="split">
+							<section>
+								<div class="contact-method">
+									<span class="icon solid alt fa-envelope"></span>
+									<h3>Email</h3>
+									<a href="mailto:apibharathbhooshan@gmail.com">apibharathbhooshan@gmail.com</a>
+								</div>
+							</section>
+							<section>
+								<div class="contact-method">
+									<span class="icon solid alt fa-phone"></span>
+									<h3>Phone</h3>
+									<span>(+91) 9645-095-759</span>
+								</div>
+							</section>
+							<section>
+								<div class="contact-method">
+									<span class="icon solid alt fa-home"></span>
+									<h3>Address</h3>
+									<span>Kallampali, Punnappala P.O<br />Wandoor, Malappuram Dist<br />
+										Kerala, India</span>
+								</div>
+							</section>
+						</section>
+					</div>
+				</section>
+
+			<!-- Footer -->
+				<footer id="footer">
+					<div class="inner">
+						<ul class="icons">
+							<li><a href="https://twitter.com/api_b_b_m" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a></li>
+							<li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a></li>
+							<li><a href="https://github.com/api-b-b-m" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+							<li><a href="https://www.linkedin.com/in/apibharathbhooshanmenon/" class="icon brands alt fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+						</ul>
+						<ul class="copyright" hidden>
+							<li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+						</ul>
+					</div>
+				</footer>
+
+		</div>
+
+	<!-- Scripts -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/jquery.scrolly.min.js"></script>
+		<script src="assets/js/jquery.scrollex.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+		<script>hljs.highlightAll();</script>
+		<script src="https://web3forms.com/client/script.js" async defer></script>
+		<script type="module" src="https://md-block.verou.me/md-block.js"></script>
+		<script src="prism.js"></script>
+
+</body>
+</html>
